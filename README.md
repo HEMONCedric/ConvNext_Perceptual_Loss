@@ -6,7 +6,7 @@ Implementation of a Perceptual loss based on the ConvNext network empirically op
 
 ## Examples
 Generation of a synthetic CT from the content of the of the CBCT and the style of a CT.
-
+![CTvspCT](https://user-images.githubusercontent.com/65610302/196657680-56f9a6a2-d7f9-4600-84d2-4cc7b6a6baff.png)
 ## Dependencies
 - Python 3.8
 - Pytorch 1.12
