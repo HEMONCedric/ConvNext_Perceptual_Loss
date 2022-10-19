@@ -10,3 +10,4 @@ Generation of a synthetic CT from the content of the of the CBCT and the style o
 ## Dependencies
 - Python 3.8
 - Pytorch 1.12
+- TorchVision 0.13.0
