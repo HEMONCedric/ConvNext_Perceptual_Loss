@@ -120,6 +120,8 @@ class ConvNextPerceptualLoss(nn.Module):
         loss_style = 0.0
         if len(input.shape)==4:
             loss_content, loss_style = self.loss_eval(input, target_style, target_content)
+            loss_content /= input.shape[0] 
+            loss_style /= input.shape[0] 
         else:
             for i in range(input.shape[2]):
                 loss_content_tmp, loss_style_tmp = self.loss_eval(input[:,0,i], target_style[:,0,i], target_content[:,0,i])
