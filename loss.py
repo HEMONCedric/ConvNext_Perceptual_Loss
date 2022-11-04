@@ -5,8 +5,8 @@ from utils import gram_matrix
 
 
 class VGGPerceptualLoss(torch.nn.Module):
-    def __init__(self, device):
-        super(VGGPerceptualLoss, self).__init__()
+    def __init__(self, device : str) -> None:
+        super().__init__()
         blocks = []
         self.device = device
         blocks.append(torchvision.models.vgg16(pretrained=True).features[:4])
@@ -24,7 +24,7 @@ class VGGPerceptualLoss(torch.nn.Module):
         self.register_buffer("std", torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1))
         self.loss_func = torch.nn.MSELoss(reduction='mean')
         
-    def prepare(self, input: torch.Tensor):
+    def prepare(self, input: torch.Tensor) -> torch.Tensor:
         input = input.repeat(1, 3, 1, 1)
         input = (input-self.mean) / self.std
         input = self.transform(input, mode='bilinear', size=(224, 224), align_corners=False)
@@ -53,7 +53,7 @@ class VGGPerceptualLoss(torch.nn.Module):
                 loss_style += self.loss_func(gram_x, gram_y)*self.style_layers_weight[i]
         return loss_content, loss_style
 
-    def forward(self, input, target_style, target_content):
+    def forward(self, input: torch.Tensor, target_style: torch.Tensor, target_content: torch.Tensor) -> torch.Tensor:
         loss_content = 0.0
         loss_style = 0.0
         if len(input.shape)==4:
@@ -73,8 +73,8 @@ class VGGPerceptualLoss(torch.nn.Module):
 
 
 class ConvNextPerceptualLoss(nn.Module):
-    def __init__(self, device):
-        super(ConvNextPerceptualLoss, self).__init__()
+    def __init__(self, device : str) -> None:
+        super().__init__()
         blocks = []
         self.device = device
         weights = torchvision.models.ConvNeXt_Tiny_Weights.IMAGENET1K_V1
@@ -91,13 +91,13 @@ class ConvNextPerceptualLoss(nn.Module):
         self.register_buffer("mean", torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1))
 
-    def prepare(self, input: torch.Tensor):
+    def prepare(self, input: torch.Tensor) -> torch.Tensor:
         input = input.repeat(1, 3, 1, 1)
         input = (input-self.mean) / self.std
         input = self.transform(input, mode='bilinear', size=(224, 224), align_corners=False)
         return input
         
-    def loss_eval(self, input : torch.Tensor, target_style, target_content):
+    def loss_eval(self, input : torch.Tensor, target_style: torch.Tensor, target_content: torch.Tensor):
         input = self.prepare(input)
         target_style = self.prepare(target_style)
         target_content = self.prepare(target_content)
@@ -120,7 +120,7 @@ class ConvNextPerceptualLoss(nn.Module):
 
         return loss_content, loss_style
 
-    def forward(self, input, target_style, target_content):
+    def forward(self, input: torch.Tensor, target_style: torch.Tensor, target_content: torch.Tensor) -> torch.Tensor:
         loss_content = 0.0
         loss_style = 0.0
         if len(input.shape)==4:
