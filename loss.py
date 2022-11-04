@@ -30,7 +30,7 @@ class VGGPerceptualLoss(torch.nn.Module):
         input = self.transform(input, mode='bilinear', size=(224, 224), align_corners=False)
         return input
     
-    def loss_eval(self, input, target_style, target_content):
+    def loss_eval(self, input: torch.Tensor, target_style: torch.Tensor, target_content: torch.Tensor):
         input = self.prepare(input)
         target_style = self.prepare(target_style)
         target_content = self.prepare(target_content)
@@ -45,6 +45,7 @@ class VGGPerceptualLoss(torch.nn.Module):
             if i in self.feature_layers:
                 z = block(z)
                 loss_content += self.loss_func(x, z)*self.feature_layers_weight[i]
+                
             if i in self.style_layers:
                 y = block(y)
                 gram_x = gram_matrix(x.double())
@@ -57,6 +58,8 @@ class VGGPerceptualLoss(torch.nn.Module):
         loss_style = 0.0
         if len(input.shape)==4:
             loss_content, loss_style = self.loss_eval(input, target_style, target_content)
+            loss_content /= input.shape[0] 
+            loss_style /= input.shape[0] 
         else:
             for i in range(input.shape[2]):
                 loss_content_tmp, loss_style_tmp = self.loss_eval(input[:,0,i], target_style[:,0,i], target_content[:,0,i])
