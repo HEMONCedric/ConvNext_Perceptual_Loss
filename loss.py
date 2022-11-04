@@ -28,11 +28,12 @@ class VGGPerceptualLoss(torch.nn.Module):
         input = input.repeat(1, 3, 1, 1)
         input = (input-self.mean) / self.std
         input = self.transform(input, mode='bilinear', size=(224, 224), align_corners=False)
- 
+        return input
+    
     def loss_eval(self, input, target_style, target_content):
-        input = prepare(input)
-        target_style = prepare(target_style)
-        target_content = prepare(target_content)
+        input = self.prepare(input)
+        target_style = self.prepare(target_style)
+        target_content = self.prepare(target_content)
         
         loss_content = 0.0
         loss_style = 0.0
@@ -91,11 +92,12 @@ class ConvNextPerceptualLoss(nn.Module):
         input = input.repeat(1, 3, 1, 1)
         input = (input-self.mean) / self.std
         input = self.transform(input, mode='bilinear', size=(224, 224), align_corners=False)
+        return input
         
     def loss_eval(self, input : torch.Tensor, target_style, target_content):
-        input = prepare(input)
-        target_style = prepare(target_style)
-        target_content = prepare(target_content)
+        input = self.prepare(input)
+        target_style = self.prepare(target_style)
+        target_content = self.prepare(target_content)
 
         loss_content = 0.0
         loss_style = 0.0
