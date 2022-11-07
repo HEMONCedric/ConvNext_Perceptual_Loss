@@ -113,7 +113,7 @@ class ConvNextPerceptualLoss(nn.Module):
                 y_style = block(y_style)
                 gram_y = gram_matrix(y_style.float())
                 gram_x = gram_matrix(x.float())
-                loss_style =  torch.nn.L1Loss(reduction='sum')(gram_x, gram_y)*self.style_layers_weight[i]
+                loss_style +=  torch.nn.L1Loss(reduction='sum')(gram_x, gram_y)*self.style_layers_weight[i]
             if i in self.feature_layers:
                 y_content = block(y_content)
                 loss_content += torch.nn.L1Loss(reduction='mean')(x.float(), y_content.float())*self.feature_layers_weight[i]
