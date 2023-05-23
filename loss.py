@@ -144,7 +144,7 @@ class MedPerceptualLoss(nn.Module):
     def __init__(self, device) -> None:
         super().__init__()
         self.model = Resnetseg()
-        checkpoint = torch.load('/home/cedric/Bureau/These/PseudoVXM/Model_parameters/Med_Unet/last_checkpoint_model_92x320x416.pt', map_location=device)
+        checkpoint = torch.load('/home/cedric/Bureau/These/PseudoVXM/Model_parameters/Med_Unet/last_checkpoint_model_92x320x416.pt', map_location=device)   #last_checkpoint_model_128x256x256, last_checkpoint_model_224x288x224, last_checkpoint_model_92x320x416 
         self.device = device
         self.model.load_state_dict(checkpoint)
         blocks = []
@@ -191,5 +191,4 @@ class MedPerceptualLoss(nn.Module):
                     # loss_content_tmp, loss_style_tmp = self.loss_eval(patches_input[:,:,i,j,k,:,:,:], patches_content[:,:,i,j,k,:,:,:], patches_style[:,:,i,j,k,:,:,:])
         loss_content, loss_style = self.loss_eval(input, target_style, target_content)
 
-        print('Loss Content: ',loss_content*20, " and Loss Style: ", loss_style*200)
         return loss_content*20+loss_style*200    #   20   500
