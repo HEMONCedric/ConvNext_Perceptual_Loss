@@ -137,3 +137,59 @@ class ConvNextPerceptualLoss(nn.Module):
         loss_content*= 70
         loss_style*= 70
         return loss_content+loss_style
+    
+    
+    
+class MedPerceptualLoss(nn.Module):
+    def __init__(self, device) -> None:
+        super().__init__()
+        self.model = Resnetseg()
+        checkpoint = torch.load('/home/cedric/Bureau/These/PseudoVXM/Model_parameters/Med_Unet/last_checkpoint_model_92x320x416.pt', map_location=device)
+        self.device = device
+        self.model.load_state_dict(checkpoint)
+        blocks = []
+        blocks.append(self.model.first_conv)
+        blocks.append(self.model.downsampling)
+        blocks.append(self.model.block0)
+
+        self.blocks = nn.ModuleList(blocks).eval().to(device=self.device)
+        self.blocks.requires_grad_(False)
+        self.transform = nn.functional.interpolate
+        self.style_layers = [0,1,2]
+        self.style_layers_weight = [1,0,1] 
+        self.feature_layers = [0]
+        self.feature_layers_weight = [1]
+        
+    def loss_eval(self, input : torch.Tensor, target_style : torch.Tensor, target_content : torch.Tensor):
+        x = input
+        y_content = target_content
+        y_style = target_style
+
+        loss_content, loss_style = 0.0, 0.0
+        for i, block in enumerate(self.blocks):
+            x = block(x)
+            if i in self.style_layers:
+                y_style = block(y_style)
+                gram_y = gram_matrix3d(y_style.double())
+                gram_x = gram_matrix3d(x.double())
+                loss_style +=  torch.nn.L1Loss(reduction='mean')(gram_x, gram_y)*self.style_layers_weight[i]
+            if i in self.feature_layers:
+                y_content = block(y_content)
+                loss_content += torch.nn.L1Loss(reduction='mean')(x, y_content)*self.feature_layers_weight[i]
+
+        return loss_content, loss_style
+
+    def forward(self, input, target_style, target_content):
+        # patches_input = input.unfold(2, 32, 32).unfold(3, 64, 64).unfold(4, 64, 64)
+        # patches_content = target_content.unfold(2, 32, 32).unfold(3, 64, 64).unfold(4, 64, 64)
+        # patches_style = target_style.unfold(2, 32, 32).unfold(3, 64, 64).unfold(4, 64, 64)
+
+        loss_content, loss_style = 0, 0
+        # for i in range(4):
+        #     for j in range(4):
+        #         for k in range(4):
+                    # loss_content_tmp, loss_style_tmp = self.loss_eval(patches_input[:,:,i,j,k,:,:,:], patches_content[:,:,i,j,k,:,:,:], patches_style[:,:,i,j,k,:,:,:])
+        loss_content, loss_style = self.loss_eval(input, target_style, target_content)
+
+        print('Loss Content: ',loss_content*20, " and Loss Style: ", loss_style*200)
+        return loss_content*20+loss_style*200    #   20   500
